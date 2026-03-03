@@ -25,5 +25,3 @@ def test_get_story():
         result = get_story(3)
         assert result == {"title": "Test", "score": 10}
 
-def test_broken():
-    assert 1==2
