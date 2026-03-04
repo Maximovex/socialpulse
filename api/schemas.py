@@ -24,6 +24,12 @@ class TrendResponse(BaseModel):
     # def round_sentiment(cls, v):
     #     return round(v,4)
 
+class TrendEngagementResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    date: date
+    avg_score: float
+    avg_comment: float
+
 class StatsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     total_stories: int
