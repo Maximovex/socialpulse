@@ -15,7 +15,6 @@ async def collect_stories():
     print(f"Saved {len(stories)} stories")
 
 
-
 def process_stories():
     pd.set_option("display.max_columns", None)
     df = pd.read_csv("data/raw/stories.csv")

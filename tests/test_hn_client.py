@@ -24,4 +24,3 @@ def test_get_story():
     with patch("collector.hn_client.requests.get", return_value=fake_response):
         result = get_story(3)
         assert result == {"title": "Test", "score": 10}
-
