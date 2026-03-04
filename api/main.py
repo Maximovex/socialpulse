@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.engine import row
+
 from storage.database import get_connection
-from api.schemas import StoryResponse, TrendResponse, StatsResponse, RankingResponse
+from api.schemas import StoryResponse, TrendResponse, StatsResponse, RankingResponse, TrendEngagementResponse
 
 app = FastAPI(title="SocialPulse", version="1.0")
 
@@ -154,4 +156,13 @@ async def collect_stories(limit:int=500):
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0"}
+
+@app.get("/trends/engagement",response_model=list[TrendEngagementResponse])
+def get_trends_engagement(days: int = 7):
+    with get_connection() as conn:
+        result = conn.execute(text("""
+        SELECT ROUND(AVG(score)::numeric,2) as avg_score, ROUND(AVG(kids_count)::numeric,2) as avg_comment, DATE(time) as date  
+        FROM stories GROUP BY date ORDER BY date DESC 
+        """))
+    return [dict(row._mapping) for row in result]
 
