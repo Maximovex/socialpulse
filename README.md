@@ -16,7 +16,8 @@ It combines asynchronous ETL data collection, dual VADER & RoBERTa sentiment ana
   - Raw & processed data stored in **CSV** and compressed **Parquet** format.
   - Relational & vector database storage using **PostgreSQL** with **pgvector** support (768-dimensional embeddings).
 - **📊 Network Analysis & Predictor**:
-  - Interactive social network graph generation with `PyVis` and `NetworkX` (not smoothly integrated yet, in test stage right now).
+  - Interactive social network graph generation with `PyVis` and `NetworkX` (not smoothly integrated yet, in test stage right now).It is available as graph.html inside the project folder and is not connected to the API yet. You can enrich this html by running `uv run python -m analysis.graph`.
+
   - Machine Learning score prediction pipelines using `XGBoost` & `scikit-learn`.
 - **🔌 RESTful API**: Built with **FastAPI** to serve story feeds, aggregated stats, daily rankings, sentiment trends, and trigger collection workflows.
 
