@@ -5,9 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/analysis/.ipynb_checkpoints" />
     </content>
     <orderEntry type="jdk" jdkName="uv (socialpulse)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="JupyterProject" />
   </component>
 </module>

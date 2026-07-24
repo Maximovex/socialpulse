@@ -3,6 +3,8 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime, date
 
+from datetime import datetime, date
+
 
 class StoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -24,14 +26,6 @@ class TrendResponse(BaseModel):
     # @field_validator("avg_sentiment")
     # def round_sentiment(cls, v):
     #     return round(v,4)
-
-
-class TrendEngagementResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    date: date
-    avg_score: float
-    avg_comment: float
-
 
 class StatsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

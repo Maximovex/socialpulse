@@ -7,7 +7,8 @@ from scipy.stats import ttest_ind
 from statsmodels.stats.power import TTestIndPower
 import numpy as np
 
-df = pd.read_parquet(DIRS["processed"] / "stories_clean.parquet")
+def load_df() -> pd.DataFrame:
+    return pd.read_parquet(DIRS["processed"] / "stories_clean.parquet")
 
 
 def required_data():
@@ -21,6 +22,7 @@ def required_data():
 
 
 def plotting_scores_comments():
+    df = load_df()
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 
     # distribution of score
@@ -39,6 +41,7 @@ def plotting_scores_comments():
 
 
 def correlation_comments_score():
+    df = load_df()
     correlation = df["score"].corr(df["kids_count"])
     print(f"Correlation: {correlation:.2f}")
 
@@ -47,18 +50,23 @@ def correlation_comments_score():
 
 
 def hypothesis_test():
+    df = load_df()
     most_discussed = df.nlargest(5, "kids_count")[["title", "score", "kids_count"]]
     print(most_discussed.to_string())
 
-    negative = df[df["sentiment_label"] == "negative"]["score"]
-    positive = df[df["sentiment_label"] == "positive"]["score"]
+    negative = df[df["roberta_label"] == "negative"]["score"]
+    positive = df[df["roberta_label"] == "positive"]["score"]
 
     t_stat, p_value = stats.ttest_ind(negative, positive)
+    pooled_std = np.sqrt((negative.std() ** 2 + positive.std() ** 2) / 2)
+    cohens_d = (negative.mean() - positive.mean()) / pooled_std
+    print(f"Cohen's d: {cohens_d:.3f}")
     print(f"t-statistic: {t_stat:.3f}")
     print(f"p-value: {p_value:.3f}")
 
 
 def t_stats_p_value_explain():
+    df = load_df()
     fig, ax = plt.subplots(figsize=(10, 5))
 
     for label, color in [
@@ -88,13 +96,5 @@ def t_stats_p_value_explain():
     plt.show()
 
 
-def cohens():
-    neg = df[df["sentiment_label"] == "negative"]["score"]
-    pos = df[df["sentiment_label"] == "positive"]["score"]
-
-    pooled_std = np.sqrt((neg.std() ** 2 + pos.std() ** 2) / 2)
-    cohens_d = (neg.mean() - pos.mean()) / pooled_std
-    print(f"Cohen's d: {cohens_d:.3f}")
-
-
-# t_stats_p_value_explain()
+if __name__ == "__main__":
+    hypothesis_test()

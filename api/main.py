@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
-
+from storage.db_store import enrich_embeddings
+from analysis.sentiment import roberta
 from storage.database import get_connection
 from api.schemas import (
     StoryResponse,
@@ -65,19 +66,23 @@ def get_story(id: int):
 
 
 @app.get("/trends/sentiment", response_model=list[TrendResponse])
+
+@app.get("/trends/sentiment", response_model=list[TrendResponse])
 def get_trends(days: int = 7):
     with get_connection() as conn:
         result = conn.execute(
             text("""
-                                   SELECT DATE(time) as date, ROUND(AVG(sentiment)::numeric,4) as avg_sentiment, COUNT(*) as story_count
-                                   FROM stories
-                                   GROUP BY DATE(time) ORDER BY date DESC
-                                   LIMIT :days
-                                   """),
+                    SELECT DATE(time) as date, ROUND(AVG(sentiment)::numeric,4) as avg_sentiment, COUNT(*) as story_count
+                    FROM stories
+                    GROUP BY DATE(time) ORDER BY date DESC
+                    LIMIT :days
+                    """),
             {"days": days},
         )
     return [dict(row._mapping) for row in result]
 
+
+@app.get("/stats", response_model=StatsResponse)
 
 @app.get("/stats", response_model=StatsResponse)
 def get_stats():
@@ -117,7 +122,7 @@ def get_stats():
         )
     row = result.fetchone()
     if row is None:
-        return HTTPException(status_code=404, detail="No data available")
+        raise HTTPException(status_code=404, detail="No data available")
     return dict(row._mapping)
 
 
@@ -131,7 +136,7 @@ def get_rankings(days: int = 7, top_n: int = 3):
                 SELECT title,score,DATE(time) as date, RANK() OVER (PARTITION BY DATE(time) 
                 ORDER BY score DESC) as daily_rank
                 FROM stories
-                WHERE time >= NOW() - INTERVAL ':days days'
+                WHERE time >= NOW() - make_interval(days => :days)
             )
             SELECT * FROM ranked WHERE daily_rank <= :top_n
             ORDER BY date DESC, daily_rank;
@@ -158,18 +163,8 @@ async def collect_stories(limit: int = 500):
     save_stories(df)
     return {"collected": len(stories)}
 
-
-# testing docker composing
+#testing docker composing
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0"}
 
-
-@app.get("/trends/engagement", response_model=list[TrendEngagementResponse])
-def get_trends_engagement(days: int = 7):
-    with get_connection() as conn:
-        result = conn.execute(text("""
-        SELECT ROUND(AVG(score)::numeric,2) as avg_score, ROUND(AVG(kids_count)::numeric,2) as avg_comment, DATE(time) as date  
-        FROM stories GROUP BY date ORDER BY date DESC LIMIT :days 
-        """),{"days":days})
-    return [dict(row._mapping) for row in result]
